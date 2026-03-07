@@ -10,6 +10,7 @@ import type {
 // `createApi` - функция из `RTK Query`, позволяющая создать объект `API`
 // для взаимодействия с внешними `API` и управления состоянием приложения
 export const playlistsApi = createApi({
+    tagTypes: ['Playlist'],
     // `reducerPath` - имя куда будут сохранены состояние и экшены для этого `API`
     reducerPath: 'playlistsApi',
     // `baseQuery` - конфигурация для `HTTP-клиента`, который будет использоваться для отправки запросов
@@ -37,6 +38,7 @@ export const playlistsApi = createApi({
                     url: `playlists`,
                 }
             },
+            providesTags: ['Playlist'],
         }),
         createPlaylist: build.mutation<{ data: PlaylistData }, CreatePlaylistArgs>({
             query: (args) => ({
@@ -52,12 +54,14 @@ export const playlistsApi = createApi({
                     },
                 },
             }),
+            invalidatesTags: ['Playlist'],
         }),
         deletePlaylist: build.mutation<void, string>({
             query: playlistId => ({
                 url: `playlists/${playlistId}`,
                 method: 'delete',
             }),
+            invalidatesTags: ['Playlist'],
         }),
         updatePlaylist: build.mutation<void, { playlistId: string; body: UpdatePlaylistArgs }>({
             query: ({ playlistId, body }) => ({
@@ -65,6 +69,7 @@ export const playlistsApi = createApi({
                 method: 'put',
                 body,
             }),
+            invalidatesTags: ['Playlist'],
         }),
     }),
 })
