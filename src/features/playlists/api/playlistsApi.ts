@@ -6,25 +6,26 @@ import type {
     PlaylistData,
     PlaylistsResponse, UpdatePlaylistArgs
 } from "@/features/playlists/api/playlistsApi.types.ts";
+import {baseApi} from "@/app/api/baseApi.ts";
 
 // `createApi` - функция из `RTK Query`, позволяющая создать объект `API`
 // для взаимодействия с внешними `API` и управления состоянием приложения
-export const playlistsApi = createApi({
-    tagTypes: ['Playlist'],
-    // `reducerPath` - имя куда будут сохранены состояние и экшены для этого `API`
-    reducerPath: 'playlistsApi',
-    // `baseQuery` - конфигурация для `HTTP-клиента`, который будет использоваться для отправки запросов
-    baseQuery: fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_BASE_URL,
-        headers: {
-            'API-KEY': import.meta.env.VITE_API_KEY,
-        },
-        prepareHeaders: headers => {
-
-            headers.set('Authorization', `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`)
-            return headers
-        },
-    }),
+export const playlistsApi =baseApi.injectEndpoints({
+    // tagTypes: ['Playlist'],
+    // // `reducerPath` - имя куда будут сохранены состояние и экшены для этого `API`
+    // reducerPath: 'playlistsApi',
+    // // `baseQuery` - конфигурация для `HTTP-клиента`, который будет использоваться для отправки запросов
+    // baseQuery: fetchBaseQuery({
+    //     baseUrl: import.meta.env.VITE_BASE_URL,
+    //     headers: {
+    //         'API-KEY': import.meta.env.VITE_API_KEY,
+    //     },
+    //     prepareHeaders: headers => {
+    //
+    //         headers.set('Authorization', `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`)
+    //         return headers
+    //     },
+    // }),
     // `endpoints` - метод, возвращающий объект с эндпоинтами для `API`, описанными
     // с помощью функций, которые будут вызываться при вызове соответствующих методов `API`
     // (например `get`, `post`, `put`, `patch`, `delete`)
