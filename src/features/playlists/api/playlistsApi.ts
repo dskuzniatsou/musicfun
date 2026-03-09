@@ -1,5 +1,5 @@
 // Во избежание ошибок импорт должен быть из `@reduxjs/toolkit/query/react`
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import type {
     CreatePlaylistArgs,
     // FetchPlaylistsArgs,
@@ -7,10 +7,11 @@ import type {
     PlaylistsResponse, UpdatePlaylistArgs
 } from "@/features/playlists/api/playlistsApi.types.ts";
 import {baseApi} from "@/app/api/baseApi.ts";
+import type {Images} from "@/common/types";
 
 // `createApi` - функция из `RTK Query`, позволяющая создать объект `API`
 // для взаимодействия с внешними `API` и управления состоянием приложения
-export const playlistsApi =baseApi.injectEndpoints({
+export const playlistsApi = baseApi.injectEndpoints({
     // tagTypes: ['Playlist'],
     // // `reducerPath` - имя куда будут сохранены состояние и экшены для этого `API`
     // reducerPath: 'playlistsApi',
@@ -37,6 +38,7 @@ export const playlistsApi =baseApi.injectEndpoints({
                 return {
                     method: 'get',
                     url: `playlists`,
+
                 }
             },
             providesTags: ['Playlist'],
@@ -45,6 +47,7 @@ export const playlistsApi =baseApi.injectEndpoints({
             query: (args) => ({
                 url: 'playlists',
                 method: 'post',
+                // body
                 body: {
                     data: {
                         type: 'playlists', // возможно, это константа – уточните по документации
@@ -65,11 +68,37 @@ export const playlistsApi =baseApi.injectEndpoints({
             invalidatesTags: ['Playlist'],
         }),
         updatePlaylist: build.mutation<void, { playlistId: string; body: UpdatePlaylistArgs }>({
-            query: ({ playlistId, body }) => ({
+            query: ({playlistId, body}) => ({
                 url: `playlists/${playlistId}`,
                 method: 'put',
-                body,
+                // body
+                body: {
+                    data: {
+                        type: 'playlists',
+                        attributes: {
+                            title: body.title,
+                            description: body.description,
+                            tagIds: body.tagIds, // если API поддерживает обновление тегов
+                        },
+                    },
+                },
             }),
+            invalidatesTags: ['Playlist'],
+        }),
+        uploadPlaylistCover: build.mutation<Images, { playlistId: string; file: File }>({
+            query: ({playlistId, file}) => {
+                const formData = new FormData()
+                formData.append('file', file)
+                return {
+                    url: `playlists/${playlistId}/images/main`,
+                    method: 'post',
+                    body: formData,
+                }
+            },
+            invalidatesTags: ['Playlist'],
+        }),
+        deletePlaylistCover: build.mutation<void, { playlistId: string }>({
+            query: ({playlistId}) => ({url: `playlists/${playlistId}/images/main`, method: 'delete'}),
             invalidatesTags: ['Playlist'],
         }),
     }),
@@ -77,5 +106,12 @@ export const playlistsApi =baseApi.injectEndpoints({
 
 // `createApi` создает объект `API`, который содержит все эндпоинты в виде хуков,
 // определенные в свойстве `endpoints`
-export const { useFetchPlaylistsQuery, useCreatePlaylistMutation, useDeletePlaylistMutation, useUpdatePlaylistMutation  } = playlistsApi
+export const {
+    useFetchPlaylistsQuery,
+    useCreatePlaylistMutation,
+    useDeletePlaylistMutation,
+    useUpdatePlaylistMutation,
+    useUploadPlaylistCoverMutation,
+    useDeletePlaylistCoverMutation
+} = playlistsApi
 

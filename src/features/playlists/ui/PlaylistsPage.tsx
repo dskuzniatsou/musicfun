@@ -15,7 +15,7 @@ export const PlaylistsPage = () => {
 
     const { register, handleSubmit, reset } = useForm<UpdatePlaylistArgs>()
 
-    const { data } = useFetchPlaylistsQuery()
+    const { data,isLoading } = useFetchPlaylistsQuery()
 
     const [deletePlaylist] = useDeletePlaylistMutation()
 
@@ -37,6 +37,7 @@ export const PlaylistsPage = () => {
             setPlaylistId(null)
         }
     }
+    if (isLoading) return <p>Загрузка...</p>
 
     return (
         <div className={s.container}>
