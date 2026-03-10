@@ -1,7 +1,7 @@
 // Во избежание ошибок импорт должен быть из `@reduxjs/toolkit/query/react`
-import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
+// import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import type {
-    CreatePlaylistArgs,
+    CreatePlaylistArgs, FetchPlaylistsArgs,
     // FetchPlaylistsArgs,
     PlaylistData,
     PlaylistsResponse, UpdatePlaylistArgs
@@ -33,16 +33,24 @@ export const playlistsApi = baseApi.injectEndpoints({
     endpoints: build => ({
         // Типизация аргументов (<возвращаемый тип, тип query аргументов (`QueryArg`)>)
         // `query` по умолчанию создает запрос `get` и указание метода необязательно
-        fetchPlaylists: build.query<PlaylistsResponse, void>({
-            query: () => {
-                return {
-                    method: 'get',
-                    url: `playlists`,
-
-                }
-            },
-            providesTags: ['Playlist'],
-        }),
+        // fetchPlaylists: build.query<PlaylistsResponse, void>({
+            fetchPlaylists: build.query<PlaylistsResponse, FetchPlaylistsArgs>({
+                query: params => ({ url: `playlists`, params }),
+                // query: ({ search, ...params }) => ({
+                //     url: 'playlists',
+                //     params: search ? { ...params, 'filter[title]': search } : params,
+                // }),
+                providesTags: ['Playlist'],
+            }),
+            // query: () => {
+            //     return {
+            //         method: 'get',
+            //         url: `playlists`,
+            //
+            //     }
+            // },
+            // providesTags: ['Playlist'],
+        // }),
         createPlaylist: build.mutation<{ data: PlaylistData }, CreatePlaylistArgs>({
             query: (args) => ({
                 url: 'playlists',
