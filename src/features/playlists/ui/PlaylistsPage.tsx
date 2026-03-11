@@ -18,7 +18,13 @@ export const PlaylistsPage = () => {
         search: debounceSearch,
         pageNumber: currentPage,
         pageSize,
-    })
+    },
+        //polling позволяет автоматически повторять запросы через определённые интервалы времени для поддержания актуальности данных.
+        // {
+        //     pollingInterval: 3000,
+        //     skipPollingIfUnfocused: true,
+        // }
+    )
 
     const changePageSizeHandler = (size: number) => {
         setPageSize(size)
