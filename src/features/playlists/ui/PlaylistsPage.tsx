@@ -7,6 +7,7 @@ import {type ChangeEvent, useState} from "react";
 import {useDebounceValue} from "@/common/hooks";
 import {Pagination} from "@/common/components/Pagination/Pagination.tsx";
 import {PlaylistsList} from "@/features/playlists/ui/PlaylistsList/PlaylistsList.tsx";
+import {LinearProgress} from "@/common/components/LinearProgress/LinearProgress.tsx";
 export const PlaylistsPage = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [pageSize, setPageSize] = useState(2)
@@ -19,7 +20,8 @@ export const PlaylistsPage = () => {
         pageNumber: currentPage,
         pageSize,
     },
-        //polling позволяет автоматически повторять запросы через определённые интервалы времени для поддержания актуальности данных.
+
+        // polling позволяет автоматически повторять запросы через определённые интервалы времени для поддержания актуальности данных.
         // {
         //     pollingInterval: 3000,
         //     skipPollingIfUnfocused: true,
@@ -35,6 +37,7 @@ export const PlaylistsPage = () => {
         setSearch(e.currentTarget.value)
         setCurrentPage(1)
     }
+    if (isLoading) return <h1>Skeleton loader...</h1>
 
     return (
         <div className={s.container}>
@@ -46,6 +49,7 @@ export const PlaylistsPage = () => {
                 onChange={searchPlaylistHandler}
             />
             <PlaylistsList playlists={data?.data || []} isPlaylistsLoading={isLoading} />
+
             <Pagination
                 currentPage={currentPage}
                 setCurrentPage={setCurrentPage}
