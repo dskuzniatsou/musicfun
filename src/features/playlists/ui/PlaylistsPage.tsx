@@ -3,11 +3,12 @@ import {
 } from "@/features/playlists/api/playlistsApi.ts";
 import s from './PlaylistsPage.module.css'
 import {CreatePlaylistForm} from "@/features/playlists/ui/CreatePlaylistForm/CreatePlaylistForm.tsx";
-import {type ChangeEvent, useState} from "react";
+import {type ChangeEvent, useEffect, useState} from "react";
 import {useDebounceValue} from "@/common/hooks";
 import {Pagination} from "@/common/components/Pagination/Pagination.tsx";
 import {PlaylistsList} from "@/features/playlists/ui/PlaylistsList/PlaylistsList.tsx";
 import {LinearProgress} from "@/common/components/LinearProgress/LinearProgress.tsx";
+import {toast} from "react-toastify";
 export const PlaylistsPage = () => {
     const [currentPage, setCurrentPage] = useState(1)
     const [pageSize, setPageSize] = useState(2)
@@ -15,7 +16,7 @@ export const PlaylistsPage = () => {
     const [search, setSearch] = useState('')
     const debounceSearch = useDebounceValue(search)
 
-    const { data, isLoading } = useFetchPlaylistsQuery({
+    const { data, isLoading,  error, isError } = useFetchPlaylistsQuery({
         search: debounceSearch,
         pageNumber: currentPage,
         pageSize,
@@ -37,6 +38,27 @@ export const PlaylistsPage = () => {
         setSearch(e.currentTarget.value)
         setCurrentPage(1)
     }
+    useEffect(() => {
+        if (!error) return
+        if ('status' in error) {
+            // FetchBaseQueryError
+            const errMsg =
+                'error' in error
+                    ? error.error
+                    : (
+                        error.data as {
+                            error: string
+                        }
+                    ).error ||
+                    (error.data as { message: string }).message ||
+                    'Some error occurred'
+            toast(errMsg, { type: 'error', theme: 'colored' })
+        } else {
+            // SerializedError
+            toast(error.message || 'Some error occurred', { type: 'error', theme: 'colored' })
+        }
+    }, [error])
+
     if (isLoading) return <h1>Skeleton loader...</h1>
 
     return (

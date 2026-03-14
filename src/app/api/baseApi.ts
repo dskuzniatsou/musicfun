@@ -1,4 +1,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
+import {toast} from "react-toastify";
+import {isErrorWithDetailArray, isErrorWithMessage, isErrorWithProperty} from "@/common/utils";
+import {handleErrors} from "@/common/utils/handleErrors.ts";
 
 export const baseApi = createApi({
     reducerPath: 'baseApi',
@@ -19,18 +22,22 @@ export const baseApi = createApi({
     // }),
     // endpoints: () => ({}),
     baseQuery: async (args, api, extraOptions) => {
-    await new Promise(resolve => setTimeout(resolve, 2000)) // delay
+        const result = await fetchBaseQuery({
+            baseUrl: import.meta.env.VITE_BASE_URL,
+            headers: {
+                'API-KEY': import.meta.env.VITE_API_KEY ,
+            },
+            prepareHeaders: headers => {
+                headers.set('Authorization', `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`)
+                return headers
+            },
+        })(args, api, extraOptions)
+        if (result.error) {
+            handleErrors(result.error)
+        }
 
-    return fetchBaseQuery({
-        baseUrl: import.meta.env.VITE_BASE_URL,
-        headers: {
-            'API-KEY': import.meta.env.VITE_API_KEY,
-        },
-        prepareHeaders: headers => {
-            headers.set('Authorization', `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`)
-            return headers
-        },
-    })(args, api, extraOptions)
-},
-endpoints: () => ({}),
+        return result
+
+    },
+    endpoints: () => ({}),
 })
