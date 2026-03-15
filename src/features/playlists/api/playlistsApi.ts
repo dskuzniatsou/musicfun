@@ -35,7 +35,7 @@ export const playlistsApi = baseApi.injectEndpoints({
         // `query` по умолчанию создает запрос `get` и указание метода необязательно
         // fetchPlaylists: build.query<PlaylistsResponse, void>({
             fetchPlaylists: build.query<PlaylistsResponse, FetchPlaylistsArgs>({
-                query: params => ({ url: `/playlists`, params }),
+                query: params => ({ url: `playlists`, params }),
                 // query: ({ search, ...params }) => ({
                 //     url: 'playlists',
                 //     params: search ? { ...params, 'filter[title]': search } : params,
@@ -53,7 +53,7 @@ export const playlistsApi = baseApi.injectEndpoints({
         // }),
         createPlaylist: build.mutation<{ data: PlaylistData }, CreatePlaylistArgs>({
             query: (args) => ({
-                url: '/playlists',
+                url: 'playlists',
                 method: 'post',
                 // body
                 body: {
@@ -70,14 +70,14 @@ export const playlistsApi = baseApi.injectEndpoints({
         }),
         deletePlaylist: build.mutation<void, string>({
             query: playlistId => ({
-                url: `/playlists/${playlistId}`,
+                url: `playlists/${playlistId}`,
                 method: 'delete',
             }),
             invalidatesTags: ['Playlist'],
         }),
         updatePlaylist: build.mutation<void, { playlistId: string; body: UpdatePlaylistArgs }>({
             query: ({playlistId, body}) => ({
-                url: `/playlists/${playlistId}`,
+                url: `playlists/${playlistId}`,
                 method: 'put',
                 // body
                 body: {

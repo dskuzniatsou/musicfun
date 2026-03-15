@@ -5,11 +5,11 @@ import {AUTH_KEYS} from "@/common/constants/constants.ts";
 export const authApi = baseApi.injectEndpoints({
     endpoints: build => ({
         getMe: build.query<MeResponse, void>({
-            query: () => `/auth/me`,
+            query: () => `auth/me`,
         }),
         login: build.mutation<LoginResponse, LoginArgs>({
             query: payload => ({
-                url: `/auth/login`,
+                url: `auth/login`,
                 method: 'post',
                 body: { ...payload, accessTokenTTL: '3m' },
             }),
@@ -24,7 +24,7 @@ export const authApi = baseApi.injectEndpoints({
         logout: build.mutation<void, void>({
             query: () => {
                 const refreshToken = localStorage.getItem(AUTH_KEYS.refreshToken)
-                return { url: '/auth/logout', method: 'post', body: { refreshToken } }
+                return { url: 'auth/logout', method: 'post', body: { refreshToken } }
             },
             async onQueryStarted(_args, { queryFulfilled, dispatch }) {
                 await queryFulfilled
