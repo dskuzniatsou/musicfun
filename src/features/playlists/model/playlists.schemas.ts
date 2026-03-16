@@ -26,6 +26,8 @@ export const playlistAttributesSchema = z.object({
     images: imagesSchema,
     user: userSchema,
     currentUserReaction: currentUserReactionSchema,
+    tracksCount: z.number(),
+    duration: z.number(),
 })
 
 export const playlistDataSchema = z.object({
