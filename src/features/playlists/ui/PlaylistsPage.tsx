@@ -2,12 +2,12 @@ import {
     useFetchPlaylistsQuery,
 } from "@/features/playlists/api/playlistsApi.ts";
 import s from './PlaylistsPage.module.css'
-import {CreatePlaylistForm} from "@/features/playlists/ui/CreatePlaylistForm/CreatePlaylistForm.tsx";
+
 import {type ChangeEvent, useEffect, useState} from "react";
 import {useDebounceValue} from "@/common/hooks";
 import {Pagination} from "@/common/components/Pagination/Pagination.tsx";
 import {PlaylistsList} from "@/features/playlists/ui/PlaylistsList/PlaylistsList.tsx";
-import {LinearProgress} from "@/common/components/LinearProgress/LinearProgress.tsx";
+
 import {toast} from "react-toastify";
 export const PlaylistsPage = () => {
     const [currentPage, setCurrentPage] = useState(1)
@@ -16,7 +16,7 @@ export const PlaylistsPage = () => {
     const [search, setSearch] = useState('')
     const debounceSearch = useDebounceValue(search)
 
-    const { data, isLoading,  error, isError } = useFetchPlaylistsQuery({
+    const { data, isLoading,  error,} = useFetchPlaylistsQuery({
         search: debounceSearch,
         pageNumber: currentPage,
         pageSize,

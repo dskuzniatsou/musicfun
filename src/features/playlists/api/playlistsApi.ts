@@ -8,49 +8,20 @@ import type {
 } from "@/features/playlists/api/playlistsApi.types.ts";
 import {baseApi} from "@/app/api/baseApi.ts";
 import type {Images} from "@/common/types";
+import {playlistCreateResponseSchema, playlistsResponseSchema} from "@/features/playlists/model/playlists.schemas.ts";
+import {withZodCatch} from "@/common/utils";
+import {imagesSchema} from "@/common/schemas/schemas.ts";
 
-// `createApi` - функция из `RTK Query`, позволяющая создать объект `API`
-// для взаимодействия с внешними `API` и управления состоянием приложения
+
 export const playlistsApi = baseApi.injectEndpoints({
-    // tagTypes: ['Playlist'],
-    // // `reducerPath` - имя куда будут сохранены состояние и экшены для этого `API`
-    // reducerPath: 'playlistsApi',
-    // // `baseQuery` - конфигурация для `HTTP-клиента`, который будет использоваться для отправки запросов
-    // baseQuery: fetchBaseQuery({
-    //     baseUrl: import.meta.env.VITE_BASE_URL,
-    //     headers: {
-    //         'API-KEY': import.meta.env.VITE_API_KEY,
-    //     },
-    //     prepareHeaders: headers => {
-    //
-    //         headers.set('Authorization', `Bearer ${import.meta.env.VITE_ACCESS_TOKEN}`)
-    //         return headers
-    //     },
-    // }),
-    // `endpoints` - метод, возвращающий объект с эндпоинтами для `API`, описанными
-    // с помощью функций, которые будут вызываться при вызове соответствующих методов `API`
-    // (например `get`, `post`, `put`, `patch`, `delete`)
+
     endpoints: build => ({
-        // Типизация аргументов (<возвращаемый тип, тип query аргументов (`QueryArg`)>)
-        // `query` по умолчанию создает запрос `get` и указание метода необязательно
-        // fetchPlaylists: build.query<PlaylistsResponse, void>({
             fetchPlaylists: build.query<PlaylistsResponse, FetchPlaylistsArgs>({
                 query: params => ({ url: `playlists`, params }),
-                // query: ({ search, ...params }) => ({
-                //     url: 'playlists',
-                //     params: search ? { ...params, 'filter[title]': search } : params,
-                // }),
+                ...withZodCatch(playlistsResponseSchema),
                 providesTags: ['Playlist'],
             }),
-            // query: () => {
-            //     return {
-            //         method: 'get',
-            //         url: `playlists`,
-            //
-            //     }
-            // },
-            // providesTags: ['Playlist'],
-        // }),
+
         createPlaylist: build.mutation<{ data: PlaylistData }, CreatePlaylistArgs>({
             query: (args) => ({
                 url: 'playlists',
@@ -66,6 +37,7 @@ export const playlistsApi = baseApi.injectEndpoints({
                     },
                 },
             }),
+            ...withZodCatch(playlistCreateResponseSchema),
             invalidatesTags: ['Playlist'],
         }),
         deletePlaylist: build.mutation<void, string>({
@@ -90,7 +62,7 @@ export const playlistsApi = baseApi.injectEndpoints({
                         },
                     },
                 },
-                async onQueryStarted({ playlistId, body }, { dispatch, queryFulfilled, getState }) {
+                async onQueryStarted({ playlistId, body }, { queryFulfilled, dispatch, getState }) {
                     const args = playlistsApi.util.selectCachedArgsForQuery(getState(), 'fetchPlaylists')
 
                     const patchResults: any[] = []
@@ -118,7 +90,7 @@ export const playlistsApi = baseApi.injectEndpoints({
 
                     try {
                         await queryFulfilled
-                    } catch {
+                    } catch  {
                         patchResults.forEach(patchResult => {
                             patchResult.undo()
                         })
@@ -137,6 +109,7 @@ export const playlistsApi = baseApi.injectEndpoints({
                     body: formData,
                 }
             },
+            ...withZodCatch(imagesSchema),
             invalidatesTags: ['Playlist'],
         }),
         deletePlaylistCover: build.mutation<void, { playlistId: string }>({
