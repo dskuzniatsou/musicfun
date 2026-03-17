@@ -1,16 +1,19 @@
 // Во избежание ошибок импорт должен быть из `@reduxjs/toolkit/query/react`
 // import {createApi, fetchBaseQuery} from '@reduxjs/toolkit/query/react'
 import type {
-    CreatePlaylistArgs, FetchPlaylistsArgs,
+    CreatePlaylistArgs, FetchPlaylistsArgs, PlaylistCreatedEvent,
     // FetchPlaylistsArgs,
     PlaylistData,
-    PlaylistsResponse, UpdatePlaylistArgs
+    PlaylistsResponse, PlaylistUpdatedEvent, UpdatePlaylistArgs
 } from "@/features/playlists/api/playlistsApi.types.ts";
 import {baseApi} from "@/app/api/baseApi.ts";
 import type {Images} from "@/common/types";
 import {playlistCreateResponseSchema, playlistsResponseSchema} from "@/features/playlists/model/playlists.schemas.ts";
 import {withZodCatch} from "@/common/utils";
 import {imagesSchema} from "@/common/schemas/schemas.ts";
+import {io, Socket} from "socket.io-client";
+import {subscribeToEvent} from "@/common/socket/subscribeToEvent.ts";
+import {SOCKET_EVENTS} from "@/common/constants/constants.ts";
 
 
 export const playlistsApi = baseApi.injectEndpoints({
@@ -19,6 +22,48 @@ export const playlistsApi = baseApi.injectEndpoints({
             fetchPlaylists: build.query<PlaylistsResponse, FetchPlaylistsArgs>({
                 query: params => ({ url: `playlists`, params }),
                 ...withZodCatch(playlistsResponseSchema),
+                keepUnusedDataFor: 0, // 👈 очистка сразу после размонтирования
+                async onCacheEntryAdded(_arg, { updateCachedData, cacheDataLoaded, cacheEntryRemoved }) {
+                    // Ждем разрешения начального запроса перед продолжением
+                    await cacheDataLoaded
+
+                    const unsubscribes = [
+                        subscribeToEvent<PlaylistCreatedEvent>(SOCKET_EVENTS.PLAYLIST_CREATED, msg => {
+                            const newPlaylist = msg.payload.data
+                            updateCachedData(state => {
+                                state.data.pop()
+                                state.data.unshift(newPlaylist)
+                                state.meta.totalCount = state.meta.totalCount + 1
+                                state.meta.pagesCount = Math.ceil(state.meta.totalCount / state.meta.pageSize)
+                            })
+                        }),
+                        subscribeToEvent<PlaylistUpdatedEvent>(SOCKET_EVENTS.PLAYLIST_UPDATED, msg => {
+                            const newPlaylist = msg.payload.data
+                            updateCachedData(state => {
+                                const index = state.data.findIndex(playlist => playlist.id === newPlaylist.id)
+                                if (index !== -1) {
+                                    state.data[index] = { ...state.data[index], ...newPlaylist }
+                                }
+                            })
+                        }),
+                    ]
+                    // const unsubscribe2 = subscribeToEvent<PlaylistUpdatedEvent>(
+                    //     SOCKET_EVENTS.PLAYLIST_UPDATED,
+                    //     msg => {
+                    //         const newPlaylist = msg.payload.data
+                    //         updateCachedData(state => {
+                    //             const index = state.data.findIndex(playlist => playlist.id === newPlaylist.id)
+                    //             if (index !== -1) {
+                    //                 state.data[index] = { ...state.data[index], ...newPlaylist }
+                    //             }
+                    //         })
+                    //     }
+                    // )
+                    // CacheEntryRemoved разрешится, когда подписка на кеш больше не активна
+                    await cacheEntryRemoved
+                    unsubscribes.forEach(unsubscribe => unsubscribe())
+
+                },
                 providesTags: ['Playlist'],
             }),
 
